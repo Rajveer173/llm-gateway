@@ -1,0 +1,53 @@
+{
+  "timestamp": "2026-09-15T13:02:16.407Z",
+  "machine": {
+    "cpu": "13th Gen Intel(R) Core(TM) i7-1360P",
+    "cores": 16,
+    "memGb": 17
+  },
+  "settings": {
+    "durationSec": 15,
+    "connections": 50,
+    "upstream": "mock provider, 0 ms latency"
+  },
+  "scenarios": [
+    {
+      "name": "baseline /healthz",
+      "what": "Fastify with no middleware: the floor",
+      "requestsPerSec": 7375,
+      "p50ms": 6,
+      "p90ms": 8,
+      "p99ms": 14,
+      "errors": 0,
+      "total": 110616
+    },
+    {
+      "name": "chat, full pipeline",
+      "what": "auth + Redis rate limit + guardrails + router + mock upstream + metering",
+      "requestsPerSec": 2057,
+      "p50ms": 22,
+      "p90ms": 33,
+      "p99ms": 45,
+      "errors": 0,
+      "total": 30844
+    },
+    {
+      "name": "chat, cache hit",
+      "what": "same as above but temperature 0, served from Redis cache",
+      "requestsPerSec": 1699,
+      "p50ms": 28,
+      "p90ms": 38,
+      "p99ms": 50,
+      "errors": 0,
+      "total": 25484
+    }
+  ],
+  "rateLimitCorrectness": {
+    "policy": "capacity 100, refill 10/s",
+    "attempted": 35224,
+    "admitted": 252,
+    "rejected429": 34972,
+    "expectedAdmitted": 250,
+    "errorPct": 0.8
+  }
+}

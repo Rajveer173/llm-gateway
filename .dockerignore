@@ -1,0 +1,7 @@
+node_modules
+dist
+.devdb
+.env
+load/results
+*.log
+.git

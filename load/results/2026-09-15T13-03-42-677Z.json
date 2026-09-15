@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-09-15T13:03:42.677Z",
+  "machine": {
+    "cpu": "13th Gen Intel(R) Core(TM) i7-1360P",
+    "cores": 16,
+    "memGb": 17
+  },
+  "settings": {
+    "durationSec": 15,
+    "connections": 50,
+    "upstream": "mock provider, 300 ms latency"
+  },
+  "scenarios": [
+    {
+      "name": "chat, full pipeline",
+      "what": "auth + Redis rate limit + guardrails + router + mock upstream + metering",
+      "requestsPerSec": 149,
+      "p50ms": 330,
+      "p90ms": 344,
+      "p99ms": 443,
+      "errors": 0,
+      "total": 2239
+    },
+    {
+      "name": "chat, cache hit",
+      "what": "same as above but temperature 0, served from Redis cache",
+      "requestsPerSec": 1683,
+      "p50ms": 28,
+      "p90ms": 40,
+      "p99ms": 53,
+      "errors": 0,
+      "total": 25244
+    }
+  ],
+  "rateLimitCorrectness": null
+}
