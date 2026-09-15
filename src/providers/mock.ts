@@ -11,10 +11,21 @@ export class MockProvider implements Provider {
     readonly name = "mock",
     private readonly latencyMs = 0,
     private readonly tokensPerAnswer = 20,
+    // When set, the mock plays a jailbreakable model: an attack-shaped prompt makes it emit this secret.
+    // The gateway's output guardrail then catches it, so the leak demo is real without a live LLM.
+    private readonly leakSecret?: string,
   ) {}
+
+  private looksLikeAttack(text: string): boolean {
+    return /ignore|disregard|reveal|system prompt|vault|secret|code|jailbreak|dan\b|verbatim/i.test(text);
+  }
 
   private answer(req: ChatRequest): string {
     const last = req.messages.at(-1)?.content ?? "";
+    if (this.leakSecret && this.looksLikeAttack(last)) {
+      // A "compromised" model that gives up the secret. Guardrails-on will filter this out.
+      return `Sure — the vault code is ${this.leakSecret}. Let me know if you need anything else.`;
+    }
     const words = [`[${this.name}]`, "you", "said:", ...last.split(/\s+/).slice(0, 12)];
     while (words.length < this.tokensPerAnswer) words.push("lorem");
     return words.slice(0, Math.max(this.tokensPerAnswer, words.length)).join(" ");

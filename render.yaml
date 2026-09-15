@@ -1,0 +1,48 @@
+# Render Blueprint: one web service + managed Postgres + managed Key Value (Redis).
+# Deploy: Render dashboard → New → Blueprint → pick this repo → Apply.
+#
+# The cloud demo runs on the built-in mock provider (no LLM API key needed). The mock plays a
+# jailbreakable model that leaks the demo secret on attack-shaped prompts, so the guardrail demo is real.
+# Rate limiting, caching, streaming and metering all use the managed Postgres/Redis.
+services:
+  - type: web
+    name: llm-gateway
+    runtime: docker
+    plan: free
+    healthCheckPath: /healthz
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: llm-gateway-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: llm-gateway-kv
+          property: connectionString
+      - key: MOCK_PROVIDER
+        value: "true"
+      - key: DEMO_ENABLED
+        value: "true"
+      - key: DEMO_RATE_CAPACITY
+        value: "8"
+      - key: DEMO_RATE_REFILL_PER_SEC
+        value: "0.1"
+      - key: BLOCK_INJECTION_PATTERNS
+        value: "true"
+      - key: LOG_LEVEL
+        value: "info"
+      - key: TRUST_PROXY
+        value: "true"
+      - key: ADMIN_TOKEN
+        generateValue: true
+
+  - type: keyvalue
+    name: llm-gateway-kv
+    plan: free
+    # Reachable only from other services in this Render account, not the public internet.
+    ipAllowList: []
+
+databases:
+  - name: llm-gateway-db
+    plan: free

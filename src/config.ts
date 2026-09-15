@@ -19,6 +19,8 @@ const schema = z.object({
   GEMINI_BASE_URL: z.string().url().default("https://generativelanguage.googleapis.com/v1beta/openai"),
   MOCK_PROVIDER: bool.default(false),
   MOCK_LATENCY_MS: z.coerce.number().int().min(0).default(50),
+  // When set, the mock provider leaks this secret on attack-shaped prompts, for the guardrail demo.
+  MOCK_LEAK_SECRET: z.string().optional(),
   /** JSON array of routes. When unset, a default is derived from the enabled providers. */
   ROUTES_JSON: z.string().optional(),
 

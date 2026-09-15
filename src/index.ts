@@ -20,7 +20,11 @@ const providers = new Map<string, Provider>();
 if (config.OLLAMA_URL) providers.set("ollama", new OllamaProvider(config.OLLAMA_URL));
 if (config.GEMINI_API_KEY) providers.set("gemini", new OpenAICompatibleProvider("gemini", config.GEMINI_BASE_URL, config.GEMINI_API_KEY));
 if (config.OPENAI_API_KEY) providers.set("openai", new OpenAICompatibleProvider("openai", config.OPENAI_BASE_URL, config.OPENAI_API_KEY));
-if (config.MOCK_PROVIDER) providers.set("mock", new MockProvider("mock", config.MOCK_LATENCY_MS));
+if (config.MOCK_PROVIDER)
+  providers.set(
+    "mock",
+    new MockProvider("mock", config.MOCK_LATENCY_MS, 20, config.MOCK_LEAK_SECRET ?? (config.DEMO_ENABLED ? config.DEMO_SECRET : undefined)),
+  );
 
 const router = new ProviderRouter(
   providers,
