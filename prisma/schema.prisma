@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  apiKeys   ApiKey[]
+}
+
+model ApiKey {
+  id               String       @id @default(cuid())
+  tenantId         String
+  tenant           Tenant       @relation(fields: [tenantId], references: [id])
+  name             String
+  /// First chars of the key, shown in dashboards so a key can be identified without revealing it
+  prefix           String
+  /// SHA-256 of the full key. The plaintext key is shown once at creation and never stored.
+  hash             String       @unique
+  rateCapacity     Int
+  rateRefillPerSec Float
+  /// Input injection filter + output canary filter. Per key, so a red-team run can compare on vs off.
+  guardrails       Boolean      @default(true)
+  revokedAt        DateTime?
+  createdAt        DateTime     @default(now())
+  usage            UsageEvent[]
+
+  @@index([tenantId])
+}
+
+model UsageEvent {
+  id               BigInt   @id @default(autoincrement())
+  apiKeyId         String
+  apiKey           ApiKey   @relation(fields: [apiKeyId], references: [id])
+  model            String
+  provider         String
+  promptTokens     Int
+  completionTokens Int
+  latencyMs        Int
+  status           Int
+  cached           Boolean  @default(false)
+  createdAt        DateTime @default(now())
+
+  @@index([apiKeyId, createdAt])
+}
