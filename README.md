@@ -7,8 +7,12 @@ only the base URL; the gateway adds API-key auth, per-key rate limiting, respons
 multi-provider fallback with circuit breakers, prompt-injection and data-leak guardrails, usage metering and
 Prometheus metrics.
 
-**Live demo:** _link added after deployment_ — try a normal prompt, a cached prompt, a prompt injection, a
-secret-leak attempt, and a 10-request burst against the rate limiter.
+**Live demo: https://llm-gateway-tkd5.onrender.com** — try a normal prompt, a cached prompt (temperature 0),
+a prompt injection, a secret-leak attempt, and a 10-request burst against the rate limiter. Deployed on
+Render (Docker web service + managed Postgres + Key Value) via [`render.yaml`](render.yaml). It runs on the
+built-in mock provider so it needs no LLM API key; the mock plays a jailbreakable model that leaks a planted
+secret on attack prompts, so the guardrail demo is real. On the free tier the first request after idle
+cold-starts for ~50 s.
 
 ## Results
 
